@@ -1,0 +1,15 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+}
+
+body {
+    margin: 0;
+    display: grid;
+    place-items: center;
+    height: 100vh;
+}
+
+#canvas {
+    background-color: white;
+}
