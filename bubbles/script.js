@@ -169,10 +169,11 @@ const renderData = (chartData) => {
                 }
             })
             .attr('data', (d) => d)
-            .attr("fill", `pink`)
-            .attr('stroke', 'black')
+            // .attr("fill", `pink`)
+            // .attr('stroke', 'black')
+            .attr('class', 'circle')
             // .attr("fill", `rgb(${randomColor()}, ${randomColor()}, ${randomColor()})`)
-            .on("mouseover", (d) => {
+            .on("mouseenter", (d) => {
                 console.log(d)
                 const data = d.target.__data__
                 const variable = d.target.parentNode.__data__
@@ -210,12 +211,13 @@ const generateCircles = () => {
 let tooltip = d3.select('body')
     .append('div')
     .attr('id', 'tooltip')
+    .attr('class', 'tooltip')
     .style('position', 'absolute')
     .style('z-index', '10')
     .style('width', 'auto')
     .style('height', 'auto')
-    .style('visibility', 'hidden')
-    .text('dummy xd 420')
+    // .style('visibility', 'hidden')
+    .text('xddd')
 
 const randomColor = () => {
     return Math.random() * 255;
