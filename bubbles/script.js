@@ -1,5 +1,11 @@
-const w = 920;
-const h = 920;
+// hacer que el sowtfare lea todos los archivos .csv ej> *.csv
+// como  sacar un PNG de la grafica xd
+// 3 -> inner ring ->ok
+// 2 -> mid ring ->ok
+// 1 -> outer ring ->ok
+
+const w = 930;
+const h = 930;
 const padding = 60;
 const svg = d3.select("svg")
 
@@ -16,22 +22,60 @@ let intercept4 = intercept3 + 50
 
 //helper radius function
 const helperRadiusFunction = {
-    0: intercept1,
+    0: intercept3,
     1: intercept2,
-    2: intercept3,
+    2: intercept1,
     label: intercept4
 }
 
 //division space for the graph
 let divisionSpace
+//type of dataset
+let datasetType
+//sets the type of dataset
+const setDatasetType = (numberOfVariables) => {
+    const datasetTypes = {
+        77: 'M1',
+        78: 'M2',
+        55: 'M3',
+        71: 'M4',
+        63: 'M5',
+        79: 'M6'
+    }
+    return datasetTypes[numberOfVariables]
+}
 
-d3.csv('../data.csv').then(data => {
+//sets the title of the graph
+const setGraphTitle = (currentType) => {
+    const titles = {
+        'M1': 'Lavar Ropa',
+        'M2': 'Bañarse',
+        'M3': 'Usar el inodoro',
+        'M4': 'Lavarse las manos',
+        'M5': 'Cepillarse los dientes',
+        'M6': 'Lavar loza',
+    }
+    return titles[currentType]
+}
+
+
+d3.csv('../load_cvs/db_piloto_m1_cluster1.csv').then(data => {
     console.log(data)
-    const variables = data.columns.filter(col => col.includes('P2V'))
+
+    //count the total number of variables in the dataset
+    const variables = data.columns.filter(col => isRealVariable(col))
+    console.log(variables)
+
+    //set dataset type acording to the number of variables
+    datasetType = setDatasetType(variables.length)
+    console.log(datasetType)
+
+    //set an array of real variables and its values
     const realData = data.reduce((prev, curr) => {
         const currData = {}
         for (const key in curr) {
-            if (key.includes('P2V')) {
+            const currentVariable = isRealVariable(key)
+            if (currentVariable) {
                 if (!isNaN(+curr[key])) {
                     currData[key] = +curr[key]
                 }
@@ -45,6 +89,7 @@ d3.csv('../data.csv').then(data => {
         }
     }, [])
     console.log(realData)
+    // indexes the array, giving each variable the total number of values on index
     const indexedVariables = realData.reduce((list, element) => {
         for (const key in element) {
             if (!list[key]) {
@@ -59,14 +104,15 @@ d3.csv('../data.csv').then(data => {
         }
         return list
     }, [])
-
     for (const key in indexedVariables) {
         indexedVariables[key].shift()
     }
+    console.log(indexedVariables)
 
     drawCanvas()
     generateRadialLines(variables)
-    // generateLabels(variables)
+    generateLabels(variables)
+    generateChartTitle()
     generateCircles()
     renderData(indexedVariables)
 })
@@ -75,6 +121,13 @@ d3.csv('../data.csv').then(data => {
 const drawCanvas = () => {
     svg.attr('width', w)
     svg.attr('height', h)
+}
+const generateChartTitle = () => {
+    svg.append('text')
+        .attr('id', 'title')
+        .text(() => setGraphTitle(datasetType))
+        .attr("x", padding / 2)
+        .attr("y", padding / 2)
 }
 
 const generateRadialLines = (variables, data) => {
@@ -102,7 +155,7 @@ const generateRadialLines = (variables, data) => {
             return radialData
         })
         .attr("stroke", "gray")
-        .attr('stroke-width', 2)
+        .attr('stroke-width', 1)
         .attr('transform', `translate(${w / 2}, ${h / 2})`)
         .append('title')
         .text((d) => d)
@@ -112,36 +165,38 @@ const generateRadialLines = (variables, data) => {
 }
 
 const generateLabels = (variables) => {
-    console.log(variables)
     //intial angle
     let angle = (Math.PI / 180) * 90
     for (let item of variables) {
-        console.log(item)
         svg.select(`#${item}`)
             .append("text")
             .attr("x", () => {
                 const xCenter = w / 2
-                const xPos = xCenter + helperRadiusFunction[label] * Math.cos(angle) - 45 / 2
+                const xPos = xCenter + helperRadiusFunction.label * Math.cos(angle) - 10 / 2
                 return xPos
             })
             .attr("y", () => {
-                const xCenter = w / 2
-                const xPos = xCenter + helperRadiusFunction[label] * Math.sin(angle)
-                return xPos
+                const yCenter = w / 2
+                const yPos = yCenter - helperRadiusFunction.label * Math.sin(angle) + 10 / 2
+                return yPos
             })
-            .text(item);
+            .text(() => {
+                const label = item.slice(3)
+                return label
+            });
         angle -= divisionSpace
     }
 }
 
 const renderData = (chartData) => {
     const keys = Object.keys(chartData)
-    console.log(chartData)
     //min-max values for normalization 
     const [minVal, maxVal] = getMinMax(chartData)
     console.log(minVal, maxVal)
     //intial angle
     let angle = (Math.PI / 180) * 90
+    //circle count
+    let circleCount = 1
 
     for (let variable in keys) {
         // console.log(keys[variable])
@@ -172,14 +227,16 @@ const renderData = (chartData) => {
             // .attr("fill", `pink`)
             // .attr('stroke', 'black')
             .attr('class', 'circle')
-            // .attr("fill", `rgb(${randomColor()}, ${randomColor()}, ${randomColor()})`)
+            .attr("fill", () => {
+                return getCircleColor(circleCount)
+            })
             .on("mouseenter", (d) => {
-                console.log(d)
+                // console.log(d)
                 const data = d.target.__data__
                 const variable = d.target.parentNode.__data__
                 tooltip.transition()
                     .style("visibility", "visible")
-                    .text(`${variable}, ${data}`)
+                    .text(`${variable}: ${data}`)
             })
             .on("mousemove", (d) => {
                 tooltip.style("top", (d.pageY - 10) + "px")
@@ -189,6 +246,7 @@ const renderData = (chartData) => {
                 tooltip.style("visibility", "hidden")
             });
         angle -= divisionSpace
+        circleCount++
     }
 }
 
@@ -203,7 +261,7 @@ const generateCircles = () => {
         .attr('cx', '50%')
         .attr('cy', '50%')
         .attr('r', interception => interception)
-        .attr('stroke-width', 2)
+        .attr('stroke-width', 1)
         .attr("stroke", "gray")
         .attr("fill", "none")
 }
@@ -216,8 +274,7 @@ let tooltip = d3.select('body')
     .style('z-index', '10')
     .style('width', 'auto')
     .style('height', 'auto')
-    // .style('visibility', 'hidden')
-    .text('xddd')
+    .style('visibility', 'hidden')
 
 const randomColor = () => {
     return Math.random() * 255;
@@ -234,7 +291,59 @@ const getMinMax = (data) => {
 }
 
 const normalize = (x, min, max) => {
-    const augmentFactor = 60
+    const augmentFactor = 55
     const normalized = augmentFactor * (x - min) / (max - min)
     return normalized
+}
+
+const isRealVariable = (variable) => {
+    return !variable.includes('cod') && !variable.includes('cluster')
+}
+
+//helper objet for setting circles color depending on the dataset type
+const datasetColorHelper = {
+    'M1': {
+        27: '#FF0066', //->red
+        64: '#99CC33', //->green
+        77: '#62D1ED',  //->blue
+    },
+    'M2': {
+        22: '#FF0066',
+        61: '#99CC33',
+        78: '#62D1ED'
+    },
+    'M3': {
+        15: '#FF0066',
+        48: '#99CC33',
+        55: '#62D1ED'
+    },
+    'M4': {
+        18: '#FF0066',
+        60: '#99CC33',
+        71: '#62D1ED'
+    },
+    'M5': {
+        20: '#FF0066',
+        54: '#99CC33',
+        63: '#62D1ED'
+    },
+    'M6': {
+        25: '#FF0066',
+        66: '#99CC33',
+        79: '#62D1ED'
+    },
+}
+
+const getCircleColor = (currentCircleNumber) => {
+    let color = 'white'
+    const colorRange = datasetColorHelper[datasetType]
+    const [redValue, greenValue, blueValue] = Object.keys(colorRange)
+    if (currentCircleNumber <= redValue) {
+        color = colorRange[redValue]
+    } else if (currentCircleNumber <= greenValue) {
+        color = colorRange[greenValue]
+    } else {
+        color = colorRange[blueValue]
+    }
+    return color
 }

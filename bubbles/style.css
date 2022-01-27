@@ -14,21 +14,32 @@ body {
   background-color: white;
 }
 
-.tooltip {
+#tooltip {
   font-family: Verdana, Geneva, Tahoma, sans-serif;
   padding: 1em 1em;
   border-radius: 10px;
   border: black 1px solid;
   background-color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .circle {
-  fill: rgba(255, 166, 166, 0.8);
   stroke: rgba(0, 0, 0, 0.6);
+  filter: opacity(0.7);
 }
 
 .circle:hover {
   transition: all ease-in-out 0.2s;
-  fill: rgba(255, 110, 74, 0.8);
   stroke: rgba(0, 0, 0, 0.8);
+  filter: opacity(1);
+}
+
+svg text {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-weight: 500;
+}
+
+svg > text {
+  font-size: 2rem;
 }
