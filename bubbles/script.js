@@ -32,6 +32,11 @@ const helperRadiusFunction = {
 let divisionSpace
 //type of dataset
 let datasetType
+
+//current file name
+let currentFileName
+
+
 //sets the type of dataset
 const setDatasetType = (numberOfVariables) => {
     const datasetTypes = {
@@ -58,65 +63,67 @@ const setGraphTitle = (currentType) => {
     return titles[currentType]
 }
 
+const generateGraph = (fileName) => {
+    cleanCanvas()
+    const path = `../cvs/${fileName}`
+    d3.csv(path).then(data => {
+        console.log(data)
 
-d3.csv('../load_cvs/db_piloto_m1_cluster1.csv').then(data => {
-    console.log(data)
+        //count the total number of variables in the dataset
+        const variables = data.columns.filter(col => isRealVariable(col))
+        console.log(variables)
 
-    //count the total number of variables in the dataset
-    const variables = data.columns.filter(col => isRealVariable(col))
-    console.log(variables)
+        //set dataset type acording to the number of variables
+        datasetType = setDatasetType(variables.length)
+        console.log(datasetType)
 
-    //set dataset type acording to the number of variables
-    datasetType = setDatasetType(variables.length)
-    console.log(datasetType)
-
-    //set an array of real variables and its values
-    const realData = data.reduce((prev, curr) => {
-        const currData = {}
-        for (const key in curr) {
-            const currentVariable = isRealVariable(key)
-            if (currentVariable) {
-                if (!isNaN(+curr[key])) {
-                    currData[key] = +curr[key]
+        //set an array of real variables and its values
+        const realData = data.reduce((prev, curr) => {
+            const currData = {}
+            for (const key in curr) {
+                const currentVariable = isRealVariable(key)
+                if (currentVariable) {
+                    if (!isNaN(+curr[key])) {
+                        currData[key] = +curr[key]
+                    }
                 }
             }
-        }
-        const isNotEmpty = Object.keys(currData).length
-        if (isNotEmpty) {
-            return [...prev, currData]
-        } else {
-            return [...prev]
-        }
-    }, [])
-    console.log(realData)
-    // indexes the array, giving each variable the total number of values on index
-    const indexedVariables = realData.reduce((list, element) => {
-        for (const key in element) {
-            if (!list[key]) {
-                list[key] = []
+            const isNotEmpty = Object.keys(currData).length
+            if (isNotEmpty) {
+                return [...prev, currData]
+            } else {
+                return [...prev]
             }
+        }, [])
+        console.log(realData)
+        // indexes the array, giving each variable the total number of values on index
+        const indexedVariables = realData.reduce((list, element) => {
+            for (const key in element) {
+                if (!list[key]) {
+                    list[key] = []
+                }
 
-            if (!list[key][element[key]] && element[key] != 0) {
-                list[key][element[key]] = 1
-            } else if (element[key] != 0) {
-                list[key][element[key]]++
+                if (!list[key][element[key]] && element[key] != 0) {
+                    list[key][element[key]] = 1
+                } else if (element[key] != 0) {
+                    list[key][element[key]]++
+                }
             }
+            return list
+        }, [])
+        for (const key in indexedVariables) {
+            indexedVariables[key].shift()
         }
-        return list
-    }, [])
-    for (const key in indexedVariables) {
-        indexedVariables[key].shift()
-    }
-    console.log(indexedVariables)
+        console.log(indexedVariables)
 
-    drawCanvas()
-    generateRadialLines(variables)
-    generateLabels(variables)
-    generateChartTitle()
-    generateCircles()
-    renderData(indexedVariables)
-})
-
+        drawCanvas()
+        generateRadialLines(variables)
+        generateLabels(variables)
+        generateChartTitle()
+        generateCircles()
+        renderData(indexedVariables)
+    })
+}
 
 const drawCanvas = () => {
     svg.attr('width', w)
@@ -346,4 +353,59 @@ const getCircleColor = (currentCircleNumber) => {
         color = colorRange[blueValue]
     }
     return color
+}
+
+const inputElement = document.getElementById("select-file");
+inputElement.addEventListener("change", handleFiles, false);
+function handleFiles() {
+    const { name: fileName } = this.files[0]/* now you can work with the file list */
+    currentFileName = fileName
+    console.log(fileName)
+    generateGraph(fileName)
+}
+
+const cleanCanvas = () => {
+    d3.selectAll('g').remove()
+    d3.selectAll('text').remove()
+
+    svg.append('g')
+        .attr('id', 'radial-lines')
+
+    svg.append('g')
+        .attr('id', 'radial-circles')
+}
+
+const downloadImg = () => {
+    if (!currentFileName) { return }
+    console.log(currentFileName)
+    const svgElement = document.getElementById('svg')
+    const svgString = new XMLSerializer().serializeToString(svgElement);
+    const { width, height } = svgElement.getBBox();
+
+    const DOMURL = window.URL || window.webkitURL || window;
+    const img = new Image();
+    const svg = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+    const url = DOMURL.createObjectURL(svg);
+    img.onload = function () {
+        const canvas = document.createElement('canvas')
+        canvas.width = width + 20
+        canvas.height = height + 10
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0);
+        const png = canvas.toDataURL("image/png");
+        document.querySelector('body').innerHTML += '<img src="' + png + '"/>';
+        download(png, 'stoffel')
+        DOMURL.revokeObjectURL(png);
+    };
+    img.src = url;
+}
+
+const download = function (href, name) {
+    var link = document.createElement('a');
+    link.download = name;
+    link.style.opacity = "0";
+    // document.append(link);
+    link.href = href;
+    link.click();
+    link.remove();
 }

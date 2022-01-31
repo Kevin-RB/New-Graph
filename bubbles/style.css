@@ -10,10 +10,6 @@ body {
   height: 100vh;
 }
 
-#canvas {
-  background-color: white;
-}
-
 #tooltip {
   font-family: Verdana, Geneva, Tahoma, sans-serif;
   padding: 1em 1em;
@@ -42,4 +38,8 @@ svg text {
 
 svg > text {
   font-size: 2rem;
+}
+#canvas-container {
+  width: auto;
+  height: auto;
 }
