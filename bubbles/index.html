@@ -6,10 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="./style.css" />
     <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script
-      type="text/javascript"
-      src="https://unpkg.com/canvg@3.0.4/lib/umd.js"
-    ></script>
     <title>PriChart</title>
   </head>
 
@@ -18,15 +14,10 @@
       <label for="select-file">Seleccionar archivo CVS para graficar</label>
       <input type="file" name="select-file" id="select-file" />
     </div>
-    <!-- <canvas id='canvas-container'> -->
     <svg id="svg">
       <g id="radial-lines"></g>
       <g id="radial-circles"></g>
     </svg>
-    <!-- <svg id='canvas' width="400" height="110">
-      <rect width="300" height="100" style="fill:rgb(0,0,255);stroke-width:3;stroke:rgb(0,0,0)" />
-    </svg> -->
-    <!-- </canvas> -->
     <div>
       <button id="download-image" onclick="downloadImg()">
         Descargar Imagen

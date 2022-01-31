@@ -131,7 +131,7 @@ const drawCanvas = () => {
 }
 const generateChartTitle = () => {
     svg.append('text')
-        .attr('id', 'title')
+        .attr('class', 'label label_title')
         .text(() => setGraphTitle(datasetType))
         .attr("x", padding / 2)
         .attr("y", padding / 2)
@@ -177,6 +177,7 @@ const generateLabels = (variables) => {
     for (let item of variables) {
         svg.select(`#${item}`)
             .append("text")
+            .attr('class', 'label')
             .attr("x", () => {
                 const xCenter = w / 2
                 const xPos = xCenter + helperRadiusFunction.label * Math.cos(angle) - 10 / 2
@@ -308,11 +309,23 @@ const isRealVariable = (variable) => {
 }
 
 //helper objet for setting circles color depending on the dataset type
+const colorCode = {
+    hex: {
+        red: '#FF0066', //->red
+        green: '#99CC33', //->green
+        blue: '#62D1ED' //->blue
+    },
+    rgba: {
+        red: 'rgba(255, 0, 102, 0.7)', //->red
+        green: 'rgba(153, 204, 51, 0.7)', //->green
+        blue: 'rgba(98, 209, 237, 0.7)',  //->blue
+    }
+}
 const datasetColorHelper = {
     'M1': {
-        27: '#FF0066', //->red
-        64: '#99CC33', //->green
-        77: '#62D1ED',  //->blue
+        27: colorCode.hex.red, //->red
+        64: colorCode.hex.green, //->green
+        77: colorCode.hex.blue,  //->blue
     },
     'M2': {
         22: '#FF0066',
@@ -367,6 +380,7 @@ function handleFiles() {
 const cleanCanvas = () => {
     d3.selectAll('g').remove()
     d3.selectAll('text').remove()
+    d3.selectAll('style').remove()
 
     svg.append('g')
         .attr('id', 'radial-lines')
@@ -379,6 +393,11 @@ const downloadImg = () => {
     if (!currentFileName) { return }
     console.log(currentFileName)
     const svgElement = document.getElementById('svg')
+
+    const cssStyleText = getCSSStyles(svgElement);
+    appendCSS(cssStyleText, svgElement);
+
+    console.log(svgElement)
     const svgString = new XMLSerializer().serializeToString(svgElement);
     const { width, height } = svgElement.getBBox();
 
@@ -393,8 +412,8 @@ const downloadImg = () => {
         const ctx = canvas.getContext("2d");
         ctx.drawImage(img, 0, 0);
         const png = canvas.toDataURL("image/png");
-        document.querySelector('body').innerHTML += '<img src="' + png + '"/>';
-        download(png, 'stoffel')
+        // document.querySelector('body').innerHTML += '<img src="' + png + '"/>';
+        download(png, 'output')
         DOMURL.revokeObjectURL(png);
     };
     img.src = url;
@@ -408,4 +427,52 @@ const download = function (href, name) {
     link.href = href;
     link.click();
     link.remove();
+}
+
+function getCSSStyles(parentElement) {
+    const selectorTextArr = [];
+    // Add Parent element Id and Classes to the list
+    selectorTextArr.push('#' + parentElement.id);
+    for (let c = 0; c < parentElement.classList.length; c++)
+        if (!contains('.' + parentElement.classList[c], selectorTextArr))
+            selectorTextArr.push('.' + parentElement.classList[c]);
+    // Add Children element Ids and Classes to the list
+    const nodes = parentElement.getElementsByTagName("*");
+    for (let i = 0; i < nodes.length; i++) {
+        const id = nodes[i].id;
+        if (!contains('#' + id, selectorTextArr))
+            selectorTextArr.push('#' + id);
+        let classes = nodes[i].classList;
+        for (let c = 0; c < classes.length; c++)
+            if (!contains('.' + classes[c], selectorTextArr))
+                selectorTextArr.push('.' + classes[c]);
+    }
+    // Extract CSS Rules
+    let extractedCSSText = "";
+    for (let i = 0; i < document.styleSheets.length; i++) {
+        const s = document.styleSheets[i];
+        try {
+            if (!s.cssRules) continue;
+        } catch (e) {
+            if (e.name !== 'SecurityError') throw e; // for Firefox
+            continue;
+        }
+        let cssRules = s.cssRules;
+        for (let r = 0; r < cssRules.length; r++) {
+            if (contains(cssRules[r].selectorText, selectorTextArr))
+                extractedCSSText += cssRules[r].cssText;
+        }
+    }
+    return extractedCSSText;
+    function contains(str, arr) {
+        return arr.indexOf(str) === -1 ? false : true;
+    }
+}
+
+function appendCSS(cssText, element) {
+    const styleElement = document.createElement("style");
+    styleElement.setAttribute("type", "text/css");
+    styleElement.innerHTML = cssText;
+    const refNode = element.hasChildNodes() ? element.children[0] : null;
+    element.insertBefore(styleElement, refNode);
 }
