@@ -6,23 +6,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="./style.css" />
     <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <title>PriChart</title>
   </head>
 
-  <body>
-    <div id="select-file-container">
-      <label for="select-file">Seleccionar archivo CVS para graficar</label>
-      <input type="file" name="select-file" id="select-file" />
+  <body class="bg-slate-100">
+    <div class="px-4 flex flex-col space-y-8 justify-start">
+      <div class="space-y-2" id="select-file-container">
+        <h1 class="font-bold text-4xl mb-0">Pri chart</h1>
+        <p class="text-sm">Selecciona un archivo con extensión .csv de la carpeta "cvs"</p>
+        <input
+          class="bg-slate-500 text-white font-base py-2 px-4 cursor-pointer rounded-md hover:bg-slate-400 active:ring-offset-2 active:ring active:ring-slate-500"
+          type="file"
+          name="select-file"
+          id="select-file"
+        />
+      </div>
+      <div>
+        <button
+          class="bg-emerald-500 text-white font-bold py-2 px-4 cursor-pointer rounded-md hover:bg-emerald-400 active:ring-offset-2 active:ring"
+          type="button"
+          id="download-image"
+          onclick="downloadImg()"
+        >
+          Descargar Imagen
+        </button>
+      </div>
     </div>
     <svg id="svg">
       <g id="radial-lines"></g>
       <g id="radial-circles"></g>
     </svg>
-    <div>
-      <button id="download-image" onclick="downloadImg()">
-        Descargar Imagen
-      </button>
-    </div>
   </body>
   <script src="script.js"></script>
 </html>

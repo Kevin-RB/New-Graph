@@ -1,9 +1,3 @@
-// hacer que el sowtfare lea todos los archivos .csv ej> *.csv
-// como  sacar un PNG de la grafica xd
-// 3 -> inner ring ->ok
-// 2 -> mid ring ->ok
-// 1 -> outer ring ->ok
-
 const w = 930;
 const h = 930;
 const padding = 60;
@@ -180,7 +174,7 @@ const generateLabels = (variables) => {
             .attr('class', 'label')
             .attr("x", () => {
                 const xCenter = w / 2
-                const xPos = xCenter + helperRadiusFunction.label * Math.cos(angle) - 10 / 2
+                const xPos = xCenter + helperRadiusFunction.label * Math.cos(angle) - 15 / 2
                 return xPos
             })
             .attr("y", () => {
@@ -328,29 +322,29 @@ const datasetColorHelper = {
         77: colorCode.hex.blue,  //->blue
     },
     'M2': {
-        22: '#FF0066',
-        61: '#99CC33',
-        78: '#62D1ED'
+        22: colorCode.hex.red,
+        61: colorCode.hex.green,
+        78: colorCode.hex.blue
     },
     'M3': {
-        15: '#FF0066',
-        48: '#99CC33',
-        55: '#62D1ED'
+        15: colorCode.hex.red,
+        48: colorCode.hex.green,
+        55: colorCode.hex.blue
     },
     'M4': {
-        18: '#FF0066',
-        60: '#99CC33',
-        71: '#62D1ED'
+        18: colorCode.hex.red,
+        60: colorCode.hex.green,
+        71: colorCode.hex.blue
     },
     'M5': {
-        20: '#FF0066',
-        54: '#99CC33',
-        63: '#62D1ED'
+        20: colorCode.hex.red,
+        54: colorCode.hex.green,
+        63: colorCode.hex.blue
     },
     'M6': {
-        25: '#FF0066',
-        66: '#99CC33',
-        79: '#62D1ED'
+        25: colorCode.hex.red,
+        66: colorCode.hex.green,
+        79: colorCode.hex.blue
     },
 }
 
