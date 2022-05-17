@@ -26,10 +26,8 @@ const helperRadiusFunction = {
 let divisionSpace
 //type of dataset
 let datasetType
-
 //current file name
 let currentFileName
-
 
 //sets the type of dataset
 const setDatasetType = (numberOfVariables) => {
@@ -57,9 +55,13 @@ const setGraphTitle = (currentType) => {
     return titles[currentType]
 }
 
+const readFile = () => {
+
+}
+
 const generateGraph = (fileName) => {
     cleanCanvas()
-    const path = `../cvs/${fileName}`
+    const path = `./csv/${fileName}`
     d3.csv(path).then(data => {
         console.log(data)
 
