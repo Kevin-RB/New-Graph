@@ -61,7 +61,7 @@ const readFile = () => {
 
 const generateGraph = (fileName) => {
     cleanCanvas()
-    const path = `./csv/${fileName}`
+    const path = `./archivos-csv/${fileName}`
     d3.csv(path).then(data => {
         console.log(data)
 

@@ -1,5 +1,7 @@
 /barchart
-*csv
-*xlsx
-csv/*
-*rar
+/datasets
+test/
+*.csv
+*.xlsx
+*.rar
+*.zip
