@@ -32,12 +32,12 @@ let currentFileName
 //sets the type of dataset
 const setDatasetType = (numberOfVariables) => {
     const datasetTypes = {
-        77: 'M1',
-        78: 'M2',
-        55: 'M3',
+        78: 'M1',
+        76: 'M2',
+        53: 'M3',
         71: 'M4',
         63: 'M5',
-        79: 'M6'
+        82: 'M6'
     }
     return datasetTypes[numberOfVariables]
 }
@@ -55,33 +55,26 @@ const setGraphTitle = (currentType) => {
     return titles[currentType]
 }
 
-const readFile = () => {
-
-}
-
 const generateGraph = (fileName) => {
     cleanCanvas()
     const path = `./archivos-csv/${fileName}`
     d3.csv(path).then(data => {
-        console.log(data)
-
+        console.log({ data });
         //count the total number of variables in the dataset
-        const variables = data.columns.filter(col => isRealVariable(col))
-        console.log(variables)
+        const variables = data.columns.filter(column => isRealVariable(column))
+        console.log({ variables })
 
         //set dataset type acording to the number of variables
         datasetType = setDatasetType(variables.length)
-        console.log(datasetType)
+        console.log({ datasetType })
 
         //set an array of real variables and its values
         const realData = data.reduce((prev, curr) => {
             const currData = {}
             for (const key in curr) {
                 const currentVariable = isRealVariable(key)
-                if (currentVariable) {
-                    if (!isNaN(+curr[key])) {
-                        currData[key] = +curr[key]
-                    }
+                if (currentVariable && !isNaN(+curr[key])) {
+                    currData[key] = +curr[key]
                 }
             }
             const isNotEmpty = Object.keys(currData).length
@@ -91,14 +84,13 @@ const generateGraph = (fileName) => {
                 return [...prev]
             }
         }, [])
-        console.log(realData)
+        console.log({ realData })
         // indexes the array, giving each variable the total number of values on index
         const indexedVariables = realData.reduce((list, element) => {
             for (const key in element) {
                 if (!list[key]) {
                     list[key] = []
                 }
-
                 if (!list[key][element[key]] && element[key] != 0) {
                     list[key][element[key]] = 1
                 } else if (element[key] != 0) {
@@ -300,8 +292,10 @@ const normalize = (x, min, max) => {
     return normalized
 }
 
-const isRealVariable = (variable) => {
-    return !variable.includes('cod') && !variable.includes('cluster')
+function isRealVariable(variable) {
+    if (!variable) return false
+    const variablename = variable.toLowerCase()
+    return !variablename.includes('cod') && !variablename.includes('cluster')
 }
 
 //helper objet for setting circles color depending on the dataset type
@@ -309,57 +303,67 @@ const colorCode = {
     hex: {
         red: '#FF0066', //->red
         green: '#99CC33', //->green
-        blue: '#62D1ED' //->blue
+        blue: '#62D1ED', //->blue
+        orange: '#ED8936' //->orange
     },
     rgba: {
         red: 'rgba(255, 0, 102, 0.7)', //->red
         green: 'rgba(153, 204, 51, 0.7)', //->green
         blue: 'rgba(98, 209, 237, 0.7)',  //->blue
+        orange: 'rgba(237,137,54,0.7)'
     }
 }
 const datasetColorHelper = {
     'M1': {
-        27: colorCode.hex.red, //->red
-        64: colorCode.hex.green, //->green
-        77: colorCode.hex.blue,  //->blue
+        24: colorCode.hex.red, //->red
+        56: colorCode.hex.green, //->green
+        69: colorCode.hex.blue,  //->blue
+        78: colorCode.hex.orange,  //->orange
     },
     'M2': {
-        22: colorCode.hex.red,
-        61: colorCode.hex.green,
-        78: colorCode.hex.blue
+        21: colorCode.hex.red,
+        47: colorCode.hex.green,
+        64: colorCode.hex.blue,
+        76: colorCode.hex.orange
     },
     'M3': {
-        15: colorCode.hex.red,
-        48: colorCode.hex.green,
-        55: colorCode.hex.blue
+        14: colorCode.hex.red,
+        38: colorCode.hex.green,
+        45: colorCode.hex.blue,
+        53: colorCode.hex.orange
     },
     'M4': {
-        18: colorCode.hex.red,
-        60: colorCode.hex.green,
-        71: colorCode.hex.blue
+        19: colorCode.hex.red,
+        40: colorCode.hex.green,
+        51: colorCode.hex.blue,
+        71: colorCode.hex.orange
     },
     'M5': {
         20: colorCode.hex.red,
-        54: colorCode.hex.green,
-        63: colorCode.hex.blue
+        45: colorCode.hex.green,
+        54: colorCode.hex.blue,
+        63: colorCode.hex.orange,
     },
     'M6': {
-        25: colorCode.hex.red,
-        66: colorCode.hex.green,
-        79: colorCode.hex.blue
+        26: colorCode.hex.red,
+        60: colorCode.hex.green,
+        74: colorCode.hex.blue,
+        82: colorCode.hex.orange,
     },
 }
 
 const getCircleColor = (currentCircleNumber) => {
     let color = 'white'
     const colorRange = datasetColorHelper[datasetType]
-    const [redValue, greenValue, blueValue] = Object.keys(colorRange)
+    const [redValue, greenValue, blueValue, orangeValue] = Object.keys(colorRange)
     if (currentCircleNumber <= redValue) {
         color = colorRange[redValue]
     } else if (currentCircleNumber <= greenValue) {
         color = colorRange[greenValue]
-    } else {
+    } else if (currentCircleNumber <= blueValue) {
         color = colorRange[blueValue]
+    } else {
+        color = colorRange[orangeValue]
     }
     return color
 }
