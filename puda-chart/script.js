@@ -12,13 +12,13 @@ let interceptionSpace = ((r2 - r1) / 2)
 let intercept1 = r1
 let intercept2 = r1 + interceptionSpace
 let intercept3 = r1 + 2 * interceptionSpace
-let intercept4 = intercept3 + 50
+let intercept4 = intercept3 + 55
 
 //helper radius function
 const helperRadiusFunction = {
-    0: intercept3,
+    0: intercept1,
     1: intercept2,
-    2: intercept1,
+    2: intercept3,
     label: intercept4
 }
 
@@ -84,7 +84,6 @@ const generateGraph = (fileName) => {
                 return [...prev]
             }
         }, [])
-        console.log({ realData })
         // indexes the array, giving each variable the total number of values on index
         const indexedVariables = realData.reduce((list, element) => {
             for (const key in element) {
@@ -188,7 +187,6 @@ const renderData = (chartData) => {
     const keys = Object.keys(chartData)
     //min-max values for normalization 
     const [minVal, maxVal] = getMinMax(chartData)
-    console.log(minVal, maxVal)
     //intial angle
     let angle = (Math.PI / 180) * 90
     //circle count
